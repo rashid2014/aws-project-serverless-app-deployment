@@ -17,7 +17,7 @@ resource "aws_apigatewayv2_integration" "s3_lambda" {
   integration_type = "AWS_PROXY"
 
   connection_type           = "INTERNET"
-  integration_method        = "POST"
+  integration_method        = "GET"
   integration_uri           = aws_lambda_function.invoke_s3.invoke_arn
 }
 
@@ -39,7 +39,7 @@ resource "aws_apigatewayv2_route" "dynamodb_lambda_route" {
 
 resource "aws_apigatewayv2_route" "s3_lambda_route" {
   api_id    = aws_apigatewayv2_api.serverless_api.id
-  route_key = "POST /invoke/s3"
+  route_key = "GET /invoke/s3"
 
   target = "integrations/${aws_apigatewayv2_integration.s3_lambda.id}"
 }
