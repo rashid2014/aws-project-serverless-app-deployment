@@ -47,3 +47,15 @@ resource "aws_s3_object" "glue_etl_script" {
   key    = "jobs/etl_job.py"
   source = "jobs/etl_job.py" # Make sure this file exists locally
 }
+
+resource "aws_s3_object" "glue_etl_data1" {
+  bucket = aws_s3_bucket.glue_scripts.id
+  key    = "jobs/data.json"
+  source = "jobs/data.json" # Make sure this file exists locally
+}
+
+resource "aws_s3_object" "glue_etl_data2" {
+  bucket = aws_s3_bucket.glue_scripts.id
+  key    = "jobs/data.csv"
+  source = "jobs/data.csv" # Make sure this file exists locally
+}
