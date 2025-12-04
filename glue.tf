@@ -8,7 +8,7 @@ resource "aws_glue_job" "etl_job" {
   number_of_workers = 2
   worker_type       = "G.1X"
   # connections       = [aws_glue_connection.example.name]
-  execution_class   = "STANDARD"
+  execution_class = "STANDARD"
 
   command {
     script_location = "s3://${aws_s3_bucket.glue_scripts.bucket}/jobs/etl_job.py"

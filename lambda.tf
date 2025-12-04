@@ -77,8 +77,8 @@ resource "aws_lambda_function" "invoke_glue" {
 
   environment {
     variables = {
-      ENVIRONMENT = "production"
-      LOG_LEVEL   = "info"
+      ENVIRONMENT   = "production"
+      LOG_LEVEL     = "info"
       GLUE_JOB_NAME = var.job_name
     }
   }

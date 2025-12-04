@@ -7,27 +7,27 @@ resource "aws_apigatewayv2_integration" "dynamodb_lambda" {
   api_id           = aws_apigatewayv2_api.serverless_api.id
   integration_type = "AWS_PROXY"
 
-  connection_type           = "INTERNET"
-  integration_method        = "POST"
-  integration_uri           = aws_lambda_function.invoke_dynamodb.invoke_arn
+  connection_type    = "INTERNET"
+  integration_method = "POST"
+  integration_uri    = aws_lambda_function.invoke_dynamodb.invoke_arn
 }
 
 resource "aws_apigatewayv2_integration" "s3_lambda" {
   api_id           = aws_apigatewayv2_api.serverless_api.id
   integration_type = "AWS_PROXY"
 
-  connection_type           = "INTERNET"
-  integration_method        = "GET"
-  integration_uri           = aws_lambda_function.invoke_s3.invoke_arn
+  connection_type    = "INTERNET"
+  integration_method = "GET"
+  integration_uri    = aws_lambda_function.invoke_s3.invoke_arn
 }
 
 resource "aws_apigatewayv2_integration" "glue_lambda" {
   api_id           = aws_apigatewayv2_api.serverless_api.id
   integration_type = "AWS_PROXY"
 
-  connection_type           = "INTERNET"
-  integration_method        = "POST"
-  integration_uri           = aws_lambda_function.invoke_glue.invoke_arn
+  connection_type    = "INTERNET"
+  integration_method = "POST"
+  integration_uri    = aws_lambda_function.invoke_glue.invoke_arn
 }
 
 resource "aws_apigatewayv2_route" "dynamodb_lambda_route" {
@@ -52,8 +52,8 @@ resource "aws_apigatewayv2_route" "glue_lambda_route" {
 }
 
 resource "aws_apigatewayv2_stage" "serverless_api_stage" {
-  api_id = aws_apigatewayv2_api.serverless_api.id
-  name   = "$default"
+  api_id      = aws_apigatewayv2_api.serverless_api.id
+  name        = "$default"
   auto_deploy = true
 }
 
