@@ -1,5 +1,5 @@
 resource "aws_glue_job" "etl_job" {
-  name              = "app3-etl-job"
+  name              = var.job_name
   description       = "An App3 Glue ETL job"
   role_arn          = aws_iam_role.glue_job_role.arn
   glue_version      = "5.0"
