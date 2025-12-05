@@ -1,15 +1,35 @@
 import json
 import os
 import boto3
-from boto3.dynamodb.conditions import Key
+from decimal import Decimal
 
+# DynamoDB setup
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(os.environ["TABLE_NAME"])
 
 
+# ----------------------------------------------------
+# Convert all DynamoDB Decimals safely
+# ----------------------------------------------------
+def to_json_safe(obj):
+    if isinstance(obj, Decimal):
+        # Convert Decimals to int or float
+        return int(obj) if obj % 1 == 0 else float(obj)
+    elif isinstance(obj, list):
+        return [to_json_safe(v) for v in obj]
+    elif isinstance(obj, dict):
+        return {k: to_json_safe(v) for k, v in obj.items()}
+    else:
+        return obj
+
+
+# ----------------------------------------------------
+# MAIN HANDLER
+# ----------------------------------------------------
 def lambda_handler(event, context):
+    print("DEBUG EVENT:", json.dumps(event))  # <-- Helpful for CloudWatch logs
+
     method = event.get("requestContext", {}).get("http", {}).get("method")
-    path   = event.get("requestContext", {}).get("http", {}).get("path")
 
     try:
         if method == "POST":
@@ -17,22 +37,23 @@ def lambda_handler(event, context):
         elif method == "GET":
             return handle_get(event)
         else:
-            return response(400, {"error": f"Unsupported method {method}"})
+            return error_response(400, f"Unsupported method {method}")
     except Exception as e:
-        return response(500, {"error": str(e)})
+        print("ERROR:", str(e))
+        return error_response(500, str(e))
 
 
-# -------------------------------
-# POST Handler: Insert/Update item
-# -------------------------------
+# ----------------------------------------------------
+# POST: Insert or Update
+# ----------------------------------------------------
 def handle_post(event):
     if "body" not in event or not event["body"]:
-        return response(400, {"error": "Missing JSON body"})
+        return error_response(400, "Missing JSON body")
 
     body = json.loads(event["body"])
 
     if "id" not in body or "number" not in body:
-        return response(400, {"error": "Fields 'id' and 'number' are required"})
+        return error_response(400, "Fields 'id' and 'number' are required")
 
     item = {
         "id": str(body["id"]),
@@ -41,37 +62,48 @@ def handle_post(event):
 
     table.put_item(Item=item)
 
-    return response(200, {
+    return success_response({
         "message": "Item stored successfully",
         "item": item
     })
 
 
-# -------------------------------
-# GET Handler: Retrieve item by ID
-# -------------------------------
+# ----------------------------------------------------
+# GET: Retrieve item by ID
+# ----------------------------------------------------
 def handle_get(event):
     params = event.get("queryStringParameters", {}) or {}
 
     if "id" not in params:
-        return response(400, {"error": "Query parameter 'id' is required"})
+        return error_response(400, "Query parameter 'id' is required")
 
     the_id = params["id"]
 
     result = table.get_item(Key={"id": the_id})
 
     if "Item" not in result:
-        return response(404, {"error": f"Item with id={the_id} not found"})
+        return error_response(404, f"Item with id={the_id} not found")
 
-    return response(200, result["Item"])
+    # Convert Decimal -> int/float
+    clean_item = to_json_safe(result["Item"])
+
+    return success_response(clean_item)
 
 
-# -------------------------------
-# HTTP Response helper
-# -------------------------------
-def response(status, body):
+# ----------------------------------------------------
+# SUCCESS + ERROR RESPONSE BUILDERS
+# ----------------------------------------------------
+def success_response(body):
+    return {
+        "statusCode": 200,
+        "headers": {"Content-Type": "application/json"},
+        "body": json.dumps(to_json_safe(body))
+    }
+
+
+def error_response(status, message):
     return {
         "statusCode": status,
         "headers": {"Content-Type": "application/json"},
-        "body": json.dumps(body)
+        "body": json.dumps({"error": message})
     }

@@ -20,7 +20,7 @@ data "archive_file" "lambda_invoke_glue" {
 # Lambda function
 resource "aws_lambda_function" "invoke_dynamodb" {
   filename         = data.archive_file.lambda_invoke_dynamodb.output_path
-  function_name    = "${lambda_funnction_name_prefix}_dynamodb"
+  function_name    = "${var.lambda_funnction_name_prefix}_dynamodb"
   role             = aws_iam_role.lambda_role_dynamodb.arn
   handler          = "app.lambda_handler"
   source_code_hash = data.archive_file.lambda_invoke_dynamodb.output_base64sha256
@@ -44,7 +44,7 @@ resource "aws_lambda_function" "invoke_dynamodb" {
 
 resource "aws_lambda_function" "invoke_s3" {
   filename         = data.archive_file.lambda_invoke_s3.output_path
-  function_name    = "${lambda_funnction_name_prefix}_s3"
+  function_name    = "${var.lambda_funnction_name_prefix}_s3"
   role             = aws_iam_role.lambda_role_s3.arn
   handler          = "app.lambda_handler"
   source_code_hash = data.archive_file.lambda_invoke_s3.output_base64sha256
@@ -68,7 +68,7 @@ resource "aws_lambda_function" "invoke_s3" {
 
 resource "aws_lambda_function" "invoke_glue" {
   filename         = data.archive_file.lambda_invoke_glue.output_path
-  function_name    = "${lambda_funnction_name_prefix}_glue"
+  function_name    = "${var.lambda_funnction_name_prefix}_glue"
   role             = aws_iam_role.lambda_role_glue.arn
   handler          = "app.lambda_handler"
   source_code_hash = data.archive_file.lambda_invoke_glue.output_base64sha256
